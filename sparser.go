@@ -51,7 +51,7 @@ func (r *SafeReader) peek() rune {
 // Move forward, and return the next rune. This will return -1 if the string is
 // at EOF.
 func (r *SafeReader) nextCh() rune {
-	if r.pos < len(r.str) {
+	if r.pos < len(r.str) && r.pos >= 0 {
 		rune, size := utf8.DecodeRuneInString(r.str[r.pos:])
 		r.ch = rune
 		r.opos = r.pos

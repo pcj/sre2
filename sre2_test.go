@@ -26,7 +26,7 @@ func checkIntSlice(t *testing.T, expected []int, result []int, err string) {
 			}
 		}
 	}
-	checkState(t, match, fmt.Sprintf("%s: got %s, expected %s", err, result, expected))
+	checkState(t, match, fmt.Sprintf("%s: got %v, expected %v", err, result, expected))
 }
 
 // Run a selection of basic regular expressions against this package.
@@ -61,16 +61,27 @@ func TestInvalidRe(t *testing.T) {
 	checkState(t, err != nil, "must fail parsing")
 	checkState(t, r == nil, "regexp must be nil")
 
-	pass := false
-	func() {
-		defer func() {
-			if r := recover(); r != nil {
-				pass = true
-			}
-		}()
-		MustParse("z(((a")
-	}()
-	checkState(t, pass, "should panic")
+	cases := []struct {
+		d  string
+		in string
+	}{
+		{
+			d:  "unclosed paren",
+			in: "z(((a",
+		},
+		{
+			d:  "unclosed bracket",
+			in: ".*node_modules.[",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.d, func(t *testing.T) {
+			_, errMsg := Parse(tc.in)
+			checkState(t, errMsg != nil, "should panic: "+tc.in)
+		})
+	}
+
 }
 
 // Test behaviour related to character classes expressed within [...].
